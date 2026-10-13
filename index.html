@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>童话世界人格测试</title>
+    <!-- 使用稳定CDN修复截图bug -->
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <style>
         * {
@@ -164,12 +165,13 @@
         </div>
     </div>
 
-    <!--结果页面-->
+    <!--结果页面【截图目标区域】-->
     <div id="page-result" class="page">
         <h2 class="title-main">你的童话人格结果</h2>
-        <div id="resultWrap">
+        <div id="captureArea">
             <img class="result-img" id="resImg">
             <div class="result-block" id="resBody"></div>
+            <div style="text-align:right; font-size:11px; color:#c9b8dd; margin-top:20px;">童话测评 ©2026</div>
         </div>
         <button class="btn" id="saveLongImg">保存结果长图</button>
         <button class="btn" id="copyShareLink">复制分享链接</button>
@@ -212,7 +214,7 @@ function savePwdRecord(obj){
     localStorage.setItem(STORAGE_KEY_PWD, JSON.stringify(obj));
 }
 
-//====================测评题目 完整28题，4选项====================
+//====================测评题目 恢复完整36题，4选项A/B/C/D====================
 const questionList = [
     {
         q: "当周末有空闲，你更倾向？",
@@ -465,6 +467,78 @@ const questionList = [
             "C 看对方曾经如何对待我",
             "D 怕麻烦，尽量委婉推脱"
         ]
+    },
+    {
+        q: "你做决定经常会被感动、同情心左右？",
+        o: [
+            "A 是的，感性占上风",
+            "B 不会，理性占主导",
+            "C 大事理性，小事感性",
+            "D 容易被故事煽动情绪"
+        ]
+    },
+    {
+        q: "你心中，更看重？",
+        o: [
+            "A 温情、羁绊、真诚的情感",
+            "B 自由、独立、自我实现",
+            "C 尊严与原则，绝不妥协",
+            "D 安稳平静，少波折就好"
+        ]
+    },
+    {
+        q: "面对别人的苦难故事，你容易落泪共情？",
+        o: [
+            "A 很容易被触动落泪",
+            "B 内心波动很小，比较平静",
+            "C 看故事真实程度",
+            "D 同情，但不会情绪失控"
+        ]
+    },
+    {
+        q: "如果现实击碎你的幻想，你会？",
+        o: [
+            "A 痛苦难过，难以接受",
+            "B 快速认清现实，调整自我",
+            "C 保留一部分幻想保护自己",
+            "D 愤怒不甘，抗拒现实"
+        ]
+    },
+    {
+        q: "集体里，你常常充当？",
+        o: [
+            "A 调和氛围照顾大家感受的人",
+            "B 拿主意推进事情落地的人",
+            "C 跟随大家，很少出头",
+            "D 旁观者，不深度卷入集体"
+        ]
+    },
+    {
+        q: "你对自己，常常？",
+        o: [
+            "A 比较宽容，接纳自身柔软脆弱",
+            "B 严格要求，希望自己强大",
+            "C 时而苛责时而摆烂",
+            "D 对自己没什么期待"
+        ]
+    },
+    {
+        q: "当需要牺牲个人幸福成全他人，你会？",
+        o: [
+            "A 会考虑做出牺牲",
+            "B 坚决不愿意牺牲自己",
+            "C 只愿意为极少数人牺牲",
+            "D 尽可能寻找两全办法"
+        ]
+    },
+    {
+        q: "你的内心深处，相信世界本质是善良的吗？",
+        o: [
+            "A 愿意相信人性本善",
+            "B 认为人性复杂善恶并存",
+            "C 见过很多恶，很难相信善",
+            "D 善与恶都看具体的人"
+        ]
     }
 ];
 
@@ -547,6 +621,7 @@ let currentShareUrl = "";
 const pagePwd = document.getElementById("page-pwd");
 const pageQuiz = document.getElementById("page-quiz");
 const pageResult = document.getElementById("page-result");
+const captureArea = document.getElementById("captureArea");
 const pwdInput = document.getElementById("pwdInput");
 const pwdTip = document.getElementById("pwdTip");
 const startBtn = document.getElementById("startBtn");
@@ -644,7 +719,7 @@ nextBtn.onclick = function(){
     }
 };
 
-//简易计分：按选择频次映射结果
+//计分逻辑
 function calcResult(){
     let counter = [0,0,0,0,0,0];
     userAnswers.forEach(ansIdx=>{
@@ -665,18 +740,31 @@ function calcResult(){
     switchPage("result");
 }
 
-//保存长图 html2canvas
+//====【修复后的保存长图函数】====
 saveLongImg.onclick = async function(){
+    saveLongImg.disabled = true;
+    saveLongImg.innerText = "正在生成图片，请稍候...";
     try{
-        let dom = document.getElementById("resultWrap");
-        const canvas = await html2canvas(dom,{backgroundColor:"#f7f2fc",scale:2});
-        let a = document.createElement("a");
-        a.download = "童话人格测试结果.png";
-        a.href = canvas.toDataURL("image/png");
-        a.click();
+        //等待图片加载完成
+        await new Promise(resolve => setTimeout(resolve,600));
+        const canvas = await html2canvas(captureArea,{
+            backgroundColor:"#ffffff",
+            scale:2,
+            useCORS:true,
+            logging:false
+        });
+        //生成下载
+        const link = document.createElement('a');
+        link.download = "童话人格测试结果.png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+        alert("图片已开始下载！手机端请查看相册/下载目录");
     }catch(e){
-        alert("生成图片失败");
+        console.error(e);
+        alert("生成图片失败！检查图片是否上传仓库根目录");
     }
+    saveLongImg.disabled = false;
+    saveLongImg.innerText = "保存结果长图";
 };
 
 //复制分享链接
