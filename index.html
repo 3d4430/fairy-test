@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>童话世界人格测试</title>
-    <!-- 使用稳定CDN修复截图bug -->
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <style>
         * {
             margin:0;
@@ -28,7 +26,6 @@
             box-shadow: 0 4px 16px #d8c8eb;
             position:relative;
         }
-        /*水印*/
         .watermark {
             position:absolute;
             right:12px;
@@ -56,10 +53,6 @@
         }
         .btn:hover {
             background:#8852c2;
-        }
-        .btn:disabled {
-            background:#c7b2e0;
-            cursor:not-allowed;
         }
         .input-item {
             width:100%;
@@ -144,7 +137,6 @@
 <div class="container">
     <div class="watermark">童话测评 ©2026</div>
 
-    <!--密码登录页-->
     <div id="page-pwd" class="page active">
         <h2 class="title-main">童话世界人格测试</h2>
         <p>请输入测试密码开始测评，每个密码可测试3次</p>
@@ -153,7 +145,6 @@
         <button class="btn" id="startBtn">开始测试</button>
     </div>
 
-    <!--答题页面-->
     <div id="page-quiz" class="page">
         <h2 class="title-main">童话世界人格测试</h2>
         <div id="qIndexTip"></div>
@@ -165,7 +156,6 @@
         </div>
     </div>
 
-    <!--结果页面【截图目标区域】-->
     <div id="page-result" class="page">
         <h2 class="title-main">你的童话人格结果</h2>
         <div id="captureArea">
@@ -173,10 +163,20 @@
             <div class="result-block" id="resBody"></div>
             <div style="text-align:right; font-size:11px; color:#c9b8dd; margin-top:20px;">童话测评 ©2026</div>
         </div>
-        <button class="btn" id="saveLongImg">保存结果长图</button>
+        <button class="btn" id="tipScreenshot">截屏保存结果</button>
         <button class="btn" id="copyShareLink">复制分享链接</button>
         <button class="btn" id="retestBtn">再测一次</button>
         <button class="btn" id="goodGiftBtn">好评有礼</button>
+    </div>
+
+    <!--截屏提示弹窗-->
+    <div class="popup-wrap" id="popupScreen">
+        <div class="popup-box">
+            <h3>保存你的测评结果</h3>
+            <p class="tip-text">📱手机：同时按下【电源键+音量减键】完成截屏<br>💻电脑：可以使用系统截图工具保存页面</p>
+            <p class="tip-text">截屏后图片就可以保存到相册，直接分享给好友！</p>
+            <button class="btn" id="closeScreenTip">知道了</button>
+        </div>
     </div>
 
     <!--好评有礼弹窗-->
@@ -190,7 +190,6 @@
 </div>
 
 <script>
-// =====================密码池：50个无规律密码=====================
 const passwordPool = [
     "7kG9s2Qz","pR4t8NvM","zD3f7BjH","mW6q2XcK","bT5g9LpR",
     "sN2d7VzP","kF8w3JmQ","rB6t1GxS","vM4h9PcD","jQ7n2WbF",
@@ -203,7 +202,6 @@ const passwordPool = [
     "nR3d8HjP","wP6m1LqG","dK9t4ScB","hF2v7NjR","qW5h3MxP",
     "bM8j6DsK","zR4n9GcF","pB7t2VhQ","rW3k5PjD","vD6s8NmB"
 ];
-//本地存储每个密码已使用次数
 const STORAGE_KEY_PWD = "quiz_pwd_used";
 function getPwdUsedRecord(){
     let raw = localStorage.getItem(STORAGE_KEY_PWD);
@@ -214,7 +212,6 @@ function savePwdRecord(obj){
     localStorage.setItem(STORAGE_KEY_PWD, JSON.stringify(obj));
 }
 
-//====================测评题目 恢复完整36题，4选项A/B/C/D====================
 const questionList = [
     {
         q: "当周末有空闲，你更倾向？",
@@ -542,11 +539,11 @@ const questionList = [
     }
 ];
 
-//6套测评结果
+// ==========填入6张图片https公开链接==========
 const resultSet = [
     {
         title:"温柔公主 | 共情治愈者",
-        img:"princess.png",
+        img:"https://替换第一张图https链接",
         body:`<p><b>荣格原型：天真者。</b>你的内核是柔软纯粹，拥有很强共情力。你能敏锐感知身边人的情绪，待人真诚善良，向往温暖真挚的关系。</p>
 <br>
 <p><b>优点：</b>细腻体贴，懂得换位思考，很容易感知世间的美好；你愿意善待他人，内心保留一份纯粹柔软。</p>
@@ -557,7 +554,7 @@ const resultSet = [
     },
     {
         title:"勇敢骑士 | 守护者",
-        img:"knight.png",
+        img:"https://替换第二张图https链接",
         body:`<p><b>荣格原型：英雄。</b>你内心勇敢正直，有很强正义感。你愿意守护在意的人，面对困境不会轻易退缩，有担当有勇气。</p>
 <br>
 <p><b>优点：</b>重情义，责任感强，遇到不公敢于站出来，抗压能力强，愿意为守护重要的人和事付出努力。</p>
@@ -568,7 +565,7 @@ const resultSet = [
     },
     {
         title:"追梦精灵 | 理想主义者",
-        img:"fairy.png",
+        img:"https://替换第三张图https链接",
         body:`<p><b>荣格原型：魔法师。</b>你心中拥有浪漫幻想，想象力充沛。你向往美好，相信心中愿景，不轻易被现实磨平理想。</p>
 <br>
 <p><b>优点：</b>内心充满热忱，保有想象力，对世界充满好奇心，敢于憧憬不一样的生活。</p>
@@ -579,7 +576,7 @@ const resultSet = [
     },
     {
         title:"睿智法师 | 思辨洞察者",
-        img:"wizard.png",
+        img:"https://替换第四张图https链接",
         body:`<p><b>荣格原型：智者。</b>你习惯理性审视世界，擅长独立思考。你看重真相与逻辑，不容易被情绪裹挟。</p>
 <br>
 <p><b>优点：</b>冷静通透，遇事善于复盘分析，拥有独立判断，不容易盲从他人。</p>
@@ -590,7 +587,7 @@ const resultSet = [
     },
     {
         title:"旷野行者 | 自由反叛者",
-        img:"mage.png",
+        img:"https://替换第五张图https链接",
         body:`<p><b>荣格原型：流浪者。</b>你极度看重自我的完整与自由，讨厌被束缚、被规训。你忠于自己内心，不愿随波逐流。</p>
 <br>
 <p><b>优点：</b>人格独立，敢于拒绝世俗期待，生命力鲜活，拥有做自己的勇气。</p>
@@ -601,7 +598,7 @@ const resultSet = [
     },
     {
         title:"造梦诗人 | 内在整合者",
-        img:"dreamer.png",
+        img:"https://替换第六张图https链接",
         body:`<p><b>荣格原型：整合者。</b>你内心同时拥有柔软与锋利，理想与现实。你接纳自己多面，能够理解人性复杂。</p>
 <br>
 <p><b>优点：</b>包容力强，共情与理智兼备；既可以看见美好，也接纳世间残酷，内心层次丰富。</p>
@@ -612,16 +609,13 @@ const resultSet = [
     }
 ];
 
-//答题状态
 let currentIndex = 0;
 let userAnswers = [];
 let currentShareUrl = "";
 
-//dom
 const pagePwd = document.getElementById("page-pwd");
 const pageQuiz = document.getElementById("page-quiz");
 const pageResult = document.getElementById("page-result");
-const captureArea = document.getElementById("captureArea");
 const pwdInput = document.getElementById("pwdInput");
 const pwdTip = document.getElementById("pwdTip");
 const startBtn = document.getElementById("startBtn");
@@ -632,14 +626,23 @@ const prevBtn = document.getElementById("prevBtn");
 const nextBtn = document.getElementById("nextBtn");
 const resImg = document.getElementById("resImg");
 const resBody = document.getElementById("resBody");
-const saveLongImg = document.getElementById("saveLongImg");
+const tipScreenshot = document.getElementById("tipScreenshot");
 const copyShareLink = document.getElementById("copyShareLink");
 const retestBtn = document.getElementById("retestBtn");
 const goodGiftBtn = document.getElementById("goodGiftBtn");
 const popupGift = document.getElementById("popupGift");
 const closePopup = document.getElementById("closePopup");
+const popupScreen = document.getElementById("popupScreen");
+const closeScreenTip = document.getElementById("closeScreenTip");
 
-//密码校验
+//截屏提示弹窗
+tipScreenshot.onclick = function(){
+    popupScreen.classList.add("show");
+}
+closeScreenTip.onclick = function(){
+    popupScreen.classList.remove("show");
+}
+
 startBtn.onclick = function(){
     let inputVal = pwdInput.value.trim();
     if(!inputVal){
@@ -650,18 +653,14 @@ startBtn.onclick = function(){
         pwdTip.innerText = "密码错误，请核对";
         return;
     }
-    //检查次数
     let rec = getPwdUsedRecord();
     let used = rec[inputVal] || 0;
     if(used >=3){
         pwdTip.innerText = "该密码已耗尽测试次数";
         return;
     }
-    //次数+1保存
     rec[inputVal] = used + 1;
     savePwdRecord(rec);
-
-    //进入答题
     switchPage("quiz");
     currentIndex = 0;
     userAnswers = [];
@@ -675,7 +674,6 @@ function switchPage(name){
     if(name === "result") pageResult.classList.add("active");
 }
 
-//渲染题目
 function renderQuestion(){
     let item = questionList[currentIndex];
     qIndexTip.innerText = `第 ${currentIndex+1} / ${questionList.length} 题`;
@@ -714,12 +712,10 @@ nextBtn.onclick = function(){
         currentIndex++;
         renderQuestion();
     }else{
-        //全部完成，计算结果
         calcResult();
     }
 };
 
-//计分逻辑
 function calcResult(){
     let counter = [0,0,0,0,0,0];
     userAnswers.forEach(ansIdx=>{
@@ -740,34 +736,6 @@ function calcResult(){
     switchPage("result");
 }
 
-//====【修复后的保存长图函数】====
-saveLongImg.onclick = async function(){
-    saveLongImg.disabled = true;
-    saveLongImg.innerText = "正在生成图片，请稍候...";
-    try{
-        //等待图片加载完成
-        await new Promise(resolve => setTimeout(resolve,600));
-        const canvas = await html2canvas(captureArea,{
-            backgroundColor:"#ffffff",
-            scale:2,
-            useCORS:true,
-            logging:false
-        });
-        //生成下载
-        const link = document.createElement('a');
-        link.download = "童话人格测试结果.png";
-        link.href = canvas.toDataURL("image/png");
-        link.click();
-        alert("图片已开始下载！手机端请查看相册/下载目录");
-    }catch(e){
-        console.error(e);
-        alert("生成图片失败！检查图片是否上传仓库根目录");
-    }
-    saveLongImg.disabled = false;
-    saveLongImg.innerText = "保存结果长图";
-};
-
-//复制分享链接
 copyShareLink.onclick = async function(){
     try{
         await navigator.clipboard.writeText(currentShareUrl);
@@ -777,13 +745,11 @@ copyShareLink.onclick = async function(){
     }
 };
 
-//再测一次
 retestBtn.onclick = function(){
     pwdInput.value = "";
     switchPage("pwd");
 };
 
-//好评有礼弹窗
 goodGiftBtn.onclick = function(){
     popupGift.classList.add("show");
 };
