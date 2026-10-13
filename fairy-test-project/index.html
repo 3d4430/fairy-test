@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>童话世界人格测试</title>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+        body {
+            background:#e8e0f8;
+            min-height:100vh;
+            padding:20px 12px;
+        }
+        .container{
+            max-width:720px;
+            margin:0 auto;
+        }
+        .password-box{
+            background:#ffffff;
+            border-radius:24px;
+            padding:40px 24px;
+            box-shadow: 0 8px 24px #00000018;
+        }
+        .title-main{
+            text-align:center;
+            font-size:44px;
+            color:#4b3484;
+            margin-bottom:16px;
+            font-weight:bold;
+        }
+        .tip-desc{
+            text-align:center;
+            font-size:20px;
+            color:#7964ad;
+            margin-bottom:28px;
+        }
+        #pwdInput{
+            width:100%;
+            font-size:20px;
+            padding:14px 16px;
+            border:2px solid #d3c8ec;
+            border-radius:12px;
+            margin-bottom:20px;
+        }
+        #startBtn{
+            width:100%;
+            padding:16px;
+            border-radius:14px;
+            border:none;
+            background:#9068e2;
+            color:#fff;
+            font-size:22px;
+            cursor:pointer;
+        }
+        .page{display:none;}
+        .page.active{display:block;}
+        .question-box{
+            background:#fff;
+            border-radius:22px;
+            padding:30px 24px;
+            box-shadow:0 6px 22px #00000017;
+        }
+        .q-title{
+            font-size:22px;
+            margin-bottom:24px;
+            color:#333;
+        }
+        .opt-item{
+            padding:14px 18px;
+            border:2px solid #d8cff0;
+            border-radius:12px;
+            margin-bottom:14px;
+            cursor:pointer;
+            font-size:18px;
+        }
+        .opt-item:hover{
+            background:#f3efff;
+        }
+        .btns-row{
+            display:flex;
+            gap:14px;
+            margin-top:30px;
+        }
+        .btns-row button{
+            flex:1;
+            padding:14px;
+            border-radius:12px;
+            border:none;
+            font-size:18px;
+            cursor:pointer;
+        }
+        #prevBtn{
+            background:#dcd2f0;
+            color:#444;
+        }
+        #nextBtn{
+            background:#9068e2;
+            color:#ffffff;
+        }
+        .result-wrap{
+            background:#ffffff;
+            border-radius:24px;
+            padding:32px 24px;
+        }
+        .res-img{
+            width:220px;
+            display:block;
+            margin:0 auto 20px;
+            border-radius:12px;
+        }
+        .res-name{
+            text-align:center;
+            font-size:30px;
+            color:#4b3484;
+            font-weight:bold;
+            margin-bottom:14px;
+        }
+        .res-text{
+            font-size:17px;
+            line-height:1.75;
+            color:#444444;
+        }
+        .action-group{
+            margin-top:32px;
+            display:grid;
+            gap:12px;
+        }
+        .action-group button{
+            padding:14px;
+            border-radius:12px;
+            border:none;
+            font-size:17px;
+            cursor:pointer;
+        }
+        .pop-mask{
+            position:fixed;
+            top:0;left:0;right:0;bottom:0;
+            background:#00000060;
+            display:none;
+            align-items:center;
+            justify-content:center;
+            z-index:99;
+        }
+        .pop-mask.show{display:flex;}
+        .pop-inner{
+            background:#fff;
+            border-radius:18px;
+            max-width:520px;
+            width:92%;
+            padding:26px 22px;
+        }
+        .watermark{
+            margin-top:24px;
+            text-align:right;
+            font-size:12px;
+            color:#aaa;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!--密码页-->
+    <div id="pagePwd" class="page active">
+        <div class="password-box">
+            <h1 class="title-main">童话世界人格测试</h1>
+            <div class="tip-desc">输入测试密码开始</div>
+            <input id="pwdInput" placeholder="请输入测试密码">
+            <button id="startBtn">开始测试</button>
+            <div class="watermark">童话测评 · 仅供娱乐</div>
+        </div>
+    </div>
+
+    <!--答题页-->
+    <div id="pageQuiz" class="page">
+        <div class="question-box">
+            <div class="q-title" id="qText"></div>
+            <div id="optWrap"></div>
+            <div class="btns-row">
+                <button id="prevBtn">上一题</button>
+                <button id="nextBtn">下一题</button>
+            </div>
+        </div>
+    </div>
+
+    <!--结果页-->
+    <div id="pageResult" class="page">
+        <div class="result-wrap" id="resultDom">
+            <img class="res-img" id="resImg">
+            <div class="res-name" id="resTitle"></div>
+            <div class="res-text" id="resBody"></div>
+            <div class="watermark">童话测评 · 仅供娱乐</div>
+        </div>
+        <div class="action-group">
+            <button id="savePicBtn">保存结果生成长图</button>
+            <button id="copyLinkBtn">复制结果分享链接</button>
+            <button id="retestBtn">再测一次</button>
+            <button id="goodGiftBtn">好评有礼</button>
+        </div>
+    </div>
+</div>
+
+<!--弹窗 好评有礼-->
+<div class="pop-mask" id="popGift">
+    <div class="pop-inner">
+        <h3>好评有礼</h3>
+        <p style="margin:14px 0;line-height:1.7;">店铺好评后，请联系客服并发送好评截图，即可获得1元返现</p>
+        <button id="closePop" style="width:100%;padding:12px;border:none;border-radius:10px;background:#9068e2;color:white;font-size:17px;">知道了</button>
+    </div>
+</div>
+
+<script>
+//密码配置
+const validPasswords = ["test2026"];
+// 上线正式版本开启本地存储计数
+const USE_LOCAL_STORAGE = true;
+const MAX_TEST_TIMES = 3;
+const STORAGE_KEY = "fairy_test_pwd_record";
+
+// 36道测评题目
+const questions = [
+    {q:"周末难得空闲，你更倾向怎么做？",o:["独自宅家看书追剧","约朋友出门游玩","动手做点手工/做饭","漫无目的随便走走"]},
+    {q:"遇到朋友向你倾诉难过心事，你会？",o:["安静认真倾听，给予安慰","帮对方分析利弊，给出解决办法","共情，陪对方一起情绪起伏","转移话题逗对方开心"]},
+    {q:"做重要决定的时候，你习惯？",o:["反复权衡，谨慎思考很久","跟着内心直觉感受快速选","听取身边人的建议再定","尽量交给别人帮自己抉择"]},
+    {q:"面对他人对你的夸奖，你的内心感受？",o:["有点不好意思，不太敢当真","很开心坦然接受赞美","会暗自怀疑对方是不是客套","快速忽略，不当一回事"]},
+    {q:"计划好的事情突然被打乱，你的反应？",o:["感到烦躁，尽量回归原计划","顺势改变，接受新变化","有点慌乱，需要一段时间平复","直接摆烂，干脆什么都不做"]},
+    {q:"在集体聚会中，你通常是？",o:["安静旁观，话不多","带动气氛，活跃全场","小范围和少数人聊天","尽量早点离开场合"]},
+    {q:"你更认同下面哪一句话？",o:["善良，但要有锋芒","坚守理想，不问世俗结果","自在随心最重要","现实安稳才是人生归宿"]},
+    {q:"别人误会你的时候，你一般会？",o:["立刻解释清楚，澄清自己","等待时机，用行动证明","懒得辩解，随别人怎么想","会觉得委屈，心里久久放不下"]},
+    {q:"对于未来，你的心态更接近？",o:["做好准备，规避风险","满怀憧憬，充满想象","活在当下，不去多想","时常感到焦虑不安"]},
+    {q:"当你需要帮助时，你会？",o:["尽量自己扛，不愿意求人","坦然开口，主动求助","试探暗示，希望别人主动发现","干脆放弃，不去求助"]},
+    {q:"看到弱者遭遇不公，你内心第一反应？",o:["挺身而出维护正义","同情，但会保持距离看待","沉浸感伤，共情苦难","觉得现实本就是如此"]},
+    {q:"对待新鲜未知的事物，你的态度？",o:["谨慎观望，确认安全再接触","充满好奇，愿意大胆尝试","看看热闹，不会深度参与","本能排斥，更喜欢熟悉旧事物"]},
+    {q:"你更愿意成为童话里哪一类角色？",o:["勇敢踏上冒险旅途的人","守护一方安宁的守护者","活在梦幻世界的梦想家","安稳过日子平凡普通人"]},
+    {q:"你怎么看待过去受过的伤害？",o:["把伤痛化为自己的力量","很难释怀，会反复回想","选择放下，向前看不再纠结","尽量遗忘，不去触碰回忆"]},
+    {q:"日常与人相处，你更看重？",o:["真诚与原则底线","互相理解共情感受","轻松自在没有压力","利益现实互惠互利"]},
+    {q:"如果拥有魔法，你最想要？",o:["保护自己与所爱之人的力量","实现心中梦想的能力","治愈他人伤痛的能力","可以自由自在去往任何地方"]},
+    {q:"面对自己的缺点，你的态度？",o:["努力改正，不断打磨自己","接纳不完美的全部自我","尽量掩盖，不被别人看见","会因此陷入自卑情绪"]},
+    {q:"压力很大的时候，你会？",o:["咬牙硬扛，坚持完成事情","找人倾诉释放情绪","独处放空，恢复内心能量","容易摆烂直接放弃"]},
+    {q:"你如何看待承诺？",o:["答应的事一定要尽力做到","视情况变化可以变通","很少许下承诺","口头听听不必当真"]},
+    {q:"看到美好的事物，你的第一感受？",o:["心生向往，想要努力靠近","静静欣赏感受这份美好","转瞬即逝不必执着","觉得与自己距离遥远"]},
+    {q:"当理想和现实冲突，你会？",o:["尽力在现实中守住理想","向现实妥协，放下幻想","执着理想，不顾现实阻碍","迷茫不知所措"]},
+    {q:"别人向你提出不合理请求，你会？",o:["果断拒绝，守住边界","不好意思拒绝勉强答应","委婉迂回的推脱对方","先答应之后再想办法"]},
+    {q:"你内心更渴望获得？",o:["他人的尊重与认可","内心安宁自洽","热烈真挚的情感体验","无拘无束不受束缚"]},
+    {q:"回忆童年，你的感受更多是？",o:["有很多温暖美好的片段","有遗憾，也受过伤害","已经记不太清了","不太愿意回望童年"]},
+    {q:"在团队里面，你更适合？",o:["牵头推动，承担责任执行","提供想法创意构思方案","配合他人，做好分内工作","不喜欢团队协作"]},
+    {q:"遇到巨大挫折失败，你会？",o:["总结教训，重新再来","情绪崩溃很久才能恢复","回避这件事不想面对","归咎外界环境与他人"]},
+    {q:"对于世间人性，你的看法？",o:["相信人性本善，但需要警惕","人性复杂善恶同时存在","对人性抱有悲观看法","不去思考这么深奥的问题"]},
+    {q:"你希望别人眼中的你是？",o:["可靠正直，值得信赖","温柔共情，善解人意","自由洒脱不受拘束","聪慧通透看得明白世事"]},
+    {q:"一件事情明明很难，你还会坚持吗？",o:["认准目标就会咬牙坚持","看值不值得再决定要不要坚持","很容易就选择放弃","要看身边人是否支持自己"]},
+    {q:"空闲的时候，你的大脑经常？",o:["规划现实接下来的事","天马行空幻想各种故事","放空什么都不去想","反复回想过去发生的事"]},
+    {q:"面对世俗的评价眼光，你会？",o:["坚持自我，不太被外界左右","会在意，但尽量调节自己心态","非常容易被外界评价影响","干脆逃避不去关注评价"]},
+    {q:"如果可以，你最想逃离什么？",o:["责任与压力重担","世俗条条框框束缚","悲伤痛苦的情绪体验","复杂纠缠的人际关系"]},
+    {q:"你认为幸福来源于？",o:["靠自己努力争取而来","内心的感受与看待世界的方式","来自他人的爱与陪伴","是可遇不可求运气"]},
+    {q:"当朋友做错伤害到你，你会？",o:["分清是非，设立边界之后再选择原谅","很难真正原谅，内心会有隔阂","沟通，希望对方理解你的感受","直接疏远不再来往"]},
+    {q:"你怎么看待成长？",o:["成长就是不断磨砺变强","成长同时也会丢失很多东西","人不一定非要强迫自己成长","被动被生活推着长大"]},
+    {q:"假如可以选择，你更愿意活在？",o:["有冒险、有挑战的世界","温暖安稳充满善意的世界","充满浪漫幻想的童话世界","现实普通平淡的人间"]}
+];
+
+//测评结果
+const resultList = [
+    {
+        img:"knight.png",
+        title:"✨勇敢骑士｜童话世界的行动者",
+        body:"荣格原型：英雄原型。你的内核是勇敢与责任。你有很强正义感，遇到困境不会轻易退缩，愿意为守护珍视的人和信念挺身而出。\n\n优点：执行力强，有担当，面对压力敢于直面挑战；你愿意不断打磨自我，努力成为更可靠的人。\n\n盲点：你习惯硬扛所有压力，容易过度消耗自己；常常忽略内心情绪，总把他人、责任放在自己前面，忘了照顾自身感受。\n\n心理启示：勇敢不等于必须永远无坚不摧，你同样可以示弱、可以求助，不必事事独自硬撑。"
+    },
+    {
+        img:"princess.png",
+        title:"💐温柔公主｜共情治愈者",
+        body:"荣格原型：天真者。你的内核是柔软纯粹，拥有很强共情力。你能敏锐感知身边人的情绪，待人真诚善良，向往温暖真挚的关系。\n\n优点：细腻体贴，懂得换位思考，很容易感知世间的美好；你愿意善待他人，内心保留一份纯粹柔软。\n\n盲点：过于在意别人感受，容易委屈自己讨好别人；面对冲突会习惯性回避，害怕发生矛盾。\n\n心理启示：善良不等于一味妥协，你的温柔值得留给懂得珍惜你的人，学会设立边界，才会少受伤害。"
+    },
+    {
+        img:"wizard.png",
+        title:"🔮智慧巫师｜清醒洞察者",
+        body:"荣格原型：智者原型。你的内核是思考与洞察。你习惯理性看待世界，喜欢思考事物背后本质，遇事擅长冷静分析。\n\n优点：思维通透，看待问题客观，拥有独立的判断力，不容易被外界裹挟。\n\n盲点：过度思考，容易精神内耗；有时会过度抽离情绪，与现实、他人产生距离感。\n\n心理启示：理性很珍贵，但不必只用头脑活着，允许自己感受情绪、体验烟火，感受本身同样具备价值。"
+    },
+    {
+        img:"fairy.png",
+        title:"🧚林间精灵｜自由追梦人",
+        body:"荣格原型：流浪者。你的内核是向往自由。讨厌被条条框框束缚，渴望随心自在，讨厌被责任、规则捆绑。\n\n优点：想象力丰富，讨厌世俗刻板，忠于自我感受，鲜活灵动，乐于体验世间新鲜事物。\n\n盲点：害怕长久的压力与责任，遇到沉重现实容易逃避；很难长期坚持枯燥的事情。\n\n心理启示：自由不是完全拒绝责任，真正的自由，是拥有选择的底气，而不是一味逃离。"
+    },
+    {
+        img:"healer.png",
+        title:"🕊治愈牧羊者｜内在守护者",
+        body:"荣格原型：照顾者原型。你的内核是守护与接纳。你擅长安抚别人伤痛，包容力很强，追求内心安宁平和。\n\n优点：包容宽厚，擅长接纳他人，能给周围人带去安定感；懂得体谅，共情苦难。\n\n盲点：容易过度承接别人负面情绪；为维持和平压抑自身诉求，忽略自己需求。\n\n心理启示：治愈他人的前提是先保全自己，你的善意需要设置边界，不要把所有人情绪重担全部压给自己。"
+    },
+    {
+        img:"dreamer.png",
+        title:"🌙月下造梦人｜浪漫理想家",
+        body:"荣格原型：魔术师原型。你的内核是丰盈的精神世界。内心拥有丰盛幻想，对美好事物抱有强烈向往，拥有很强创造力。\n\n优点：想象力充沛，精神世界富足；对美、浪漫高度敏感，永远保有一份理想主义。\n\n盲点：容易活在精神幻想，与现实脱节；遇到残酷现实容易感到失落。\n\n心理启示：理想可贵，但也需要落地现实；学会接纳现实不完美，梦想才能够扎根生长。"
+    }
+];
+
+//业务逻辑
+let current = 0;
+let userAnswers = [];
+
+//dom
+const pagePwd = document.getElementById("pagePwd");
+const pageQuiz = document.getElementById("pageQuiz");
+const pageResult = document.getElementById("pageResult");
+const pwdInput = document.getElementById("pwdInput");
+const startBtn = document.getElementById("startBtn");
+const qText = document.getElementById("qText");
+const optWrap = document.getElementById("optWrap");
+const prevBtn = document.getElementById("prevBtn");
+const nextBtn = document.getElementById("nextBtn");
+const resImg = document.getElementById("resImg");
+const resTitle = document.getElementById("resTitle");
+const resBody = document.getElementById("resBody");
+const savePicBtn = document.getElementById("savePicBtn");
+const copyLinkBtn = document.getElementById("copyLinkBtn");
+const retestBtn = document.getElementById("retestBtn");
+const goodGiftBtn = document.getElementById("goodGiftBtn");
+const popGift = document.getElementById("popGift");
+const closePop = document.getElementById("closePop");
+const resultDom = document.getElementById("resultDom");
+
+//获取密码测试记录
+function getTestRecord(){
+    if(!USE_LOCAL_STORAGE) return {};
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return {};
+    return JSON.parse(raw);
+}
+function saveTestRecord(record){
+    if(!USE_LOCAL_STORAGE) return;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(record));
+}
+
+//密码校验+次数限制
+startBtn.onclick = function(){
+    const pwd = pwdInput.value.trim();
+    if(!validPasswords.includes(pwd)){
+        alert("密码错误，请核对！");
+        return;
+    }
+    const record = getTestRecord();
+    const count = record[pwd] || 0;
+    if(count >= MAX_TEST_TIMES){
+        alert("该密码已达到最大测试次数"+MAX_TEST_TIMES+"次，无法继续测试！");
+        return;
+    }
+    record[pwd] = count + 1;
+    saveTestRecord(record);
+    enterQuiz();
+};
+
+function enterQuiz(){
+    pagePwd.classList.remove("active");
+    pageQuiz.classList.add("active");
+    current = 0;
+    userAnswers = Array(questions.length).fill(null);
+    renderQuestion();
+}
+
+function renderQuestion(){
+    const item = questions[current];
+    qText.innerText = (current+1)+" / "+questions.length + " ｜ "+item.q;
+    optWrap.innerHTML = "";
+    item.o.forEach((opt,idx)=>{
+        const div = document.createElement("div");
+        div.className = "opt-item";
+        div.innerText = opt;
+        if(userAnswers[current] === idx){
+            div.style.background="#e3daf8";
+            div.style.borderColor="#9068e2";
+        }
+        div.onclick = ()=>{
+            userAnswers[current] = idx;
+            renderQuestion();
+        }
+        optWrap.appendChild(div);
+    })
+    prevBtn.disabled = current===0;
+    prevBtn.style.opacity = current===0?"0.4":"1";
+    nextBtn.innerText = (current === questions.length-1) ? "提交查看结果":"下一题";
+}
+
+prevBtn.onclick = function(){
+    if(current>0){
+        current -=1;
+        renderQuestion();
+    }
+}
+
+nextBtn.onclick = function(){
+    if(userAnswers[current]===null){
+        alert("请选择一个选项！");
+        return;
+    }
+    if(current < questions.length-1){
+        current += 1;
+        renderQuestion();
+    }else{
+        calcResult();
+    }
+}
+
+//简单计分逻辑
+function calcResult(){
+    let score = [0,0,0,0,0,0];
+    userAnswers.forEach((ans,i)=>{
+        const q = questions[i];
+        if(ans===0) score[0]++;
+        if(ans===1) score[1]++;
+        if(ans===2) score[2]++;
+        if(ans===3) score[3]++;
+    })
+    let maxIndex = 0;
+    for(let i=0;i<score.length;i++){
+        if(score[i]>score[maxIndex]) maxIndex=i;
+    }
+    showResult(maxIndex);
+}
+
+function showResult(idx){
+    pageQuiz.classList.remove("active");
+    pageResult.classList.add("active");
+    const r = resultList[idx];
+    resImg.src = r.img;
+    resTitle.innerText = r.title;
+    resBody.innerText = r.body;
+}
+
+//生成长图下载
+savePicBtn.onclick = async function(){
+    try {
+        savePicBtn.disabled = true;
+        savePicBtn.innerText = "正在生成图片…";
+        const canvas = await html2canvas(resultDom,{
+            useCORS:true,
+            scale:2,
+            backgroundColor:"#ffffff"
+        });
+        const link = document.createElement("a");
+        link.download = "童话人格测试结果.png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+        savePicBtn.disabled = false;
+        savePicBtn.innerText = "保存结果生成长图";
+    }catch(e){
+        alert("图片生成失败！");
+        savePicBtn.disabled = false;
+        savePicBtn.innerText = "保存结果生成长图";
+    }
+}
+
+copyLinkBtn.onclick = async function(){
+    try{
+        await navigator.clipboard.writeText(location.href);
+        alert("页面链接已经复制，可以分享给好友！");
+    }catch(err){
+        alert("复制失败，请手动复制浏览器地址栏网址");
+    }
+}
+
+retestBtn.onclick = function(){
+    pageResult.classList.remove("active");
+    pagePwd.classList.add("active");
+    pwdInput.value="";
+}
+
+goodGiftBtn.onclick = function(){
+    popGift.classList.add("show");
+}
+
+closePop.onclick = function(){
+    popGift.classList.remove("show");
+}
+</script>
+</body>
+</html>
