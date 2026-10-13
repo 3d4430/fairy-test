@@ -159,24 +159,15 @@
     <div id="page-result" class="page">
         <h2 class="title-main">你的童话人格结果</h2>
         <div id="captureArea">
+            <!-- 结果配图保留！ -->
             <img class="result-img" id="resImg">
             <div class="result-block" id="resBody"></div>
             <div style="text-align:right; font-size:11px; color:#c9b8dd; margin-top:20px;">童话测评 ©2026</div>
         </div>
-        <button class="btn" id="tipScreenshot">截屏保存结果</button>
+        <!-- 删除了截屏按钮，只剩下3个按钮 -->
         <button class="btn" id="copyShareLink">复制分享链接</button>
         <button class="btn" id="retestBtn">再测一次</button>
         <button class="btn" id="goodGiftBtn">好评有礼</button>
-    </div>
-
-    <!--截屏提示弹窗-->
-    <div class="popup-wrap" id="popupScreen">
-        <div class="popup-box">
-            <h3>保存你的测评结果</h3>
-            <p class="tip-text">📱手机：同时按下【电源键+音量减键】完成截屏<br>💻电脑：可以使用系统截图工具保存页面</p>
-            <p class="tip-text">截屏后图片就可以保存到相册，直接分享给好友！</p>
-            <button class="btn" id="closeScreenTip">知道了</button>
-        </div>
     </div>
 
     <!--好评有礼弹窗-->
@@ -626,22 +617,12 @@ const prevBtn = document.getElementById("prevBtn");
 const nextBtn = document.getElementById("nextBtn");
 const resImg = document.getElementById("resImg");
 const resBody = document.getElementById("resBody");
-const tipScreenshot = document.getElementById("tipScreenshot");
 const copyShareLink = document.getElementById("copyShareLink");
 const retestBtn = document.getElementById("retestBtn");
 const goodGiftBtn = document.getElementById("goodGiftBtn");
 const popupGift = document.getElementById("popupGift");
 const closePopup = document.getElementById("closePopup");
-const popupScreen = document.getElementById("popupScreen");
-const closeScreenTip = document.getElementById("closeScreenTip");
 
-//截屏提示弹窗
-tipScreenshot.onclick = function(){
-    popupScreen.classList.add("show");
-}
-closeScreenTip.onclick = function(){
-    popupScreen.classList.remove("show");
-}
 
 startBtn.onclick = function(){
     let inputVal = pwdInput.value.trim();
