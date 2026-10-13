@@ -175,7 +175,6 @@
             <div class="watermark">童话测评 · 仅供娱乐</div>
         </div>
     </div>
-
     <!--答题页-->
     <div id="pageQuiz" class="page">
         <div class="question-box">
@@ -187,11 +186,10 @@
             </div>
         </div>
     </div>
-
     <!--结果页-->
     <div id="pageResult" class="page">
         <div class="result-wrap" id="resultDom">
-            <img class="res-img" id="resImg">
+            <img class="res-img" id="resImg" crossorigin="anonymous">
             <div class="res-name" id="resTitle"></div>
             <div class="res-text" id="resBody"></div>
             <div class="watermark">童话测评 · 仅供娱乐</div>
@@ -204,7 +202,6 @@
         </div>
     </div>
 </div>
-
 <!--弹窗 好评有礼-->
 <div class="pop-mask" id="popGift">
     <div class="pop-inner">
@@ -213,7 +210,6 @@
         <button id="closePop" style="width:100%;padding:12px;border:none;border-radius:10px;background:#9068e2;color:white;font-size:17px;">知道了</button>
     </div>
 </div>
-
 <script>
 //密码配置
 const validPasswords = ["test2026"];
@@ -221,7 +217,6 @@ const validPasswords = ["test2026"];
 const USE_LOCAL_STORAGE = true;
 const MAX_TEST_TIMES = 3;
 const STORAGE_KEY = "fairy_test_pwd_record";
-
 // 36道测评题目
 const questions = [
     {q:"周末难得空闲，你更倾向怎么做？",o:["独自宅家看书追剧","约朋友出门游玩","动手做点手工/做饭","漫无目的随便走走"]},
@@ -261,7 +256,6 @@ const questions = [
     {q:"你怎么看待成长？",o:["成长就是不断磨砺变强","成长同时也会丢失很多东西","人不一定非要强迫自己成长","被动被生活推着长大"]},
     {q:"假如可以选择，你更愿意活在？",o:["有冒险、有挑战的世界","温暖安稳充满善意的世界","充满浪漫幻想的童话世界","现实普通平淡的人间"]}
 ];
-
 //测评结果
 const resultList = [
     {
@@ -295,11 +289,9 @@ const resultList = [
         body:"荣格原型：魔术师原型。你的内核是丰盈的精神世界。内心拥有丰盛幻想，对美好事物抱有强烈向往，拥有很强创造力。\n\n优点：想象力充沛，精神世界富足；对美、浪漫高度敏感，永远保有一份理想主义。\n\n盲点：容易活在精神幻想，与现实脱节；遇到残酷现实容易感到失落。\n\n心理启示：理想可贵，但也需要落地现实；学会接纳现实不完美，梦想才能够扎根生长。"
     }
 ];
-
 //业务逻辑
 let current = 0;
 let userAnswers = [];
-
 //dom
 const pagePwd = document.getElementById("pagePwd");
 const pageQuiz = document.getElementById("pageQuiz");
@@ -320,7 +312,6 @@ const goodGiftBtn = document.getElementById("goodGiftBtn");
 const popGift = document.getElementById("popGift");
 const closePop = document.getElementById("closePop");
 const resultDom = document.getElementById("resultDom");
-
 //获取密码测试记录
 function getTestRecord(){
     if(!USE_LOCAL_STORAGE) return {};
@@ -332,7 +323,6 @@ function saveTestRecord(record){
     if(!USE_LOCAL_STORAGE) return;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(record));
 }
-
 //密码校验+次数限制
 startBtn.onclick = function(){
     const pwd = pwdInput.value.trim();
@@ -350,7 +340,6 @@ startBtn.onclick = function(){
     saveTestRecord(record);
     enterQuiz();
 };
-
 function enterQuiz(){
     pagePwd.classList.remove("active");
     pageQuiz.classList.add("active");
@@ -358,7 +347,6 @@ function enterQuiz(){
     userAnswers = Array(questions.length).fill(null);
     renderQuestion();
 }
-
 function renderQuestion(){
     const item = questions[current];
     qText.innerText = (current+1)+" / "+questions.length + " ｜ "+item.q;
@@ -381,14 +369,12 @@ function renderQuestion(){
     prevBtn.style.opacity = current===0?"0.4":"1";
     nextBtn.innerText = (current === questions.length-1) ? "提交查看结果":"下一题";
 }
-
 prevBtn.onclick = function(){
     if(current>0){
         current -=1;
         renderQuestion();
     }
 }
-
 nextBtn.onclick = function(){
     if(userAnswers[current]===null){
         alert("请选择一个选项！");
@@ -401,7 +387,6 @@ nextBtn.onclick = function(){
         calcResult();
     }
 }
-
 //简单计分逻辑
 function calcResult(){
     let score = [0,0,0,0,0,0];
@@ -418,7 +403,6 @@ function calcResult(){
     }
     showResult(maxIndex);
 }
-
 function showResult(idx){
     pageQuiz.classList.remove("active");
     pageResult.classList.add("active");
@@ -427,30 +411,38 @@ function showResult(idx){
     resTitle.innerText = r.title;
     resBody.innerText = r.body;
 }
-
-//生成长图下载
+//生成长图下载【修复版本】
 savePicBtn.onclick = async function(){
     try {
         savePicBtn.disabled = true;
         savePicBtn.innerText = "正在生成图片…";
         const canvas = await html2canvas(resultDom,{
             useCORS:true,
+            allowTaint:true,
             scale:2,
             backgroundColor:"#ffffff"
         });
+
+        // 浏览器下载
         const link = document.createElement("a");
         link.download = "童话人格测试结果.png";
         link.href = canvas.toDataURL("image/png");
-        link.click();
+        // 判断是否微信环境
+        const isWechat = /MicroMessenger/i.test(navigator.userAgent);
+        if(isWechat){
+            alert("微信浏览器限制无法直接下载图片，请长按页面手动截图保存！");
+        }else{
+            link.click();
+        }
         savePicBtn.disabled = false;
         savePicBtn.innerText = "保存结果生成长图";
     }catch(e){
-        alert("图片生成失败！");
+        console.error("生成图片异常：",e);
+        alert("图片生成失败！浏览器限制，请直接手动截图保存结果页面。");
         savePicBtn.disabled = false;
         savePicBtn.innerText = "保存结果生成长图";
     }
 }
-
 copyLinkBtn.onclick = async function(){
     try{
         await navigator.clipboard.writeText(location.href);
@@ -459,17 +451,14 @@ copyLinkBtn.onclick = async function(){
         alert("复制失败，请手动复制浏览器地址栏网址");
     }
 }
-
 retestBtn.onclick = function(){
     pageResult.classList.remove("active");
     pagePwd.classList.add("active");
     pwdInput.value="";
 }
-
 goodGiftBtn.onclick = function(){
     popGift.classList.add("show");
 }
-
 closePop.onclick = function(){
     popGift.classList.remove("show");
 }
